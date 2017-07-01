@@ -70,6 +70,7 @@ class ArcticFox extends events.EventEmitter {
                                 this.callback = null;
                             }
                         }
+                        break;
                     default:
                 }
             });
@@ -81,10 +82,7 @@ class ArcticFox extends events.EventEmitter {
             this.emit('connect');
         } catch (err) {
             this.disconnect();
-            return;
         }
-
-
     }
 
     disconnect() {
@@ -99,7 +97,7 @@ class ArcticFox extends events.EventEmitter {
 
     createCommand(commandCode, arg1, arg2) {
         // See https://github.com/TBXin/NFirmwareEditor/blob/master/src/NCore/USB/HidConnector.cs#L324
-        let arr = [
+        const arr = [
             commandCode,
 
             14,
@@ -608,8 +606,8 @@ class ArcticFox extends events.EventEmitter {
         }
         const y = date.getFullYear();
         const payload = [
-            y & 0xff,
-            (y & 0xff00) >> 8,
+            y & 0xFF,
+            (y & 0xFF00) >> 8,
             date.getMonth() + 1,
             date.getDate(),
             date.getHours(),
