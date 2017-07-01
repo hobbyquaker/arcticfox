@@ -1,0 +1,44 @@
+{
+  "name": "arcticfox",
+  "version": "0.0.3",
+  "description": "Module that abstracts the HID communication with the ArcticFox firmware",
+  "main": "index.js",
+  "scripts": {
+    "test": "xo --space 4"
+  },
+  "author": "Sebastian Raff <hq@ccu.io>",
+  "license": "GPLv3",
+  "dependencies": {
+    "binary": "^0.3.0",
+    "node-hid": "^0.5.4"
+  },
+  "devDependencies": {
+    "camo-purge": "latest",
+    "xo": "latest"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "engineStrict": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hobbyquaker/arcticfox"
+  },
+  "bugs": {
+    "url": "https://github.com/hobbyquaker/arcticfox/issues"
+  },
+  "homepage": "https://github.com/hobbyquaker/arcticfox",
+  "keywords": [
+    "vape",
+    "ecigarette",
+    "joyetech",
+    "wismec",
+    "eleaf",
+    "nfe",
+    "ntoolbox",
+    "arcticfox-firmware",
+    "monitor",
+    "usb",
+    "hid"
+  ]
+}
