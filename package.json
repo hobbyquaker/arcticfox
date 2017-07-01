@@ -4,7 +4,7 @@
   "description": "Module that abstracts the HID communication with the ArcticFox firmware",
   "main": "index.js",
   "scripts": {
-    "test": "xo --space 4"
+    "test": "camo-purge; xo --space 4 --ignore test.js"
   },
   "author": "Sebastian Raff <hq@ccu.io>",
   "license": "GPLv3",
