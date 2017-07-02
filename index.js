@@ -205,6 +205,11 @@ class ArcticFox extends events.EventEmitter {
             .vars;
 
         data.Name = String(data.Name);
+        data.Power /= 10;
+        data.Resistance /= 1000;
+        data.PreheatTime /= 100;
+        data.PreheatDelay /= 10;
+        data.PreheatPower /= 10;
         data.Material = data.Flags & 0x0F;
         data.IsTemperatureDominant = Boolean(data.Flags & 0x10);
         data.IsCelcius = Boolean(data.Flags & 0x20);
@@ -229,8 +234,9 @@ class ArcticFox extends events.EventEmitter {
             .buffer('buf', buf.length)
             .vars;
 
-        data.productId = String(data.productId);
-        data.maxDevicePower /= 10;
+        data.ProductId = String(data.ProductId);
+        data.HardwareVersion = String(data.HardwareVersion / 100);
+        data.MaxDevicePower /= 10;
 
         buf = data.buf;
         delete data.buf;
@@ -368,6 +374,71 @@ class ArcticFox extends events.EventEmitter {
             .buffer('buf', buf.length)
             .vars;
 
+        data.IsFlipped = Boolean(data.IsFlipped);
+        data.IsStealthMode = Boolean(data.IsStealthMode);
+        data.WakeUpByPlusMinus = Boolean(data.WakeUpByPlusMinus);
+        data.IsPowerStep1W = Boolean(data.IsPowerStep1W);
+        data.IsTemperatureStep1C2F = Boolean(data.IsTemperatureStep1C2F);
+        data.IsLogoEnabled = Boolean(data.IsLogoEnabled);
+        data.IsClassicMenu = Boolean(data.IsClassicMenu);
+        data.IsClockOnMainScreen = Boolean(data.IsClockOnMainScreen);
+        data.IsUpDownSwapped = Boolean(data.IsUpDownSwapped);
+        data.ShowChargingInStealth = Boolean(data.ShowChargingInStealth);
+        data.ShowScreensaverInStealth = Boolean(data.ShowScreensaverInStealth);
+        data.ClockOnClickInStealth = Boolean(data.ClockOnClickInStealth);
+
+        data.ClassicSkinVWLine1 = data.ClassicSkinVWLine1 & 0x7f;
+        data.ClassicSkinVWLine1Puff = Boolean(data.ClassicSkinVWLine1 & 0x80);
+        data.ClassicSkinVWLine2 = data.ClassicSkinVWLine2 & 0x7f;
+        data.ClassicSkinVWLine2Puff = Boolean(data.ClassicSkinVWLine2 & 0x80);
+        data.ClassicSkinVWLine3 = data.ClassicSkinVWLine3 & 0x7f;
+        data.ClassicSkinVWLine3Puff = Boolean(data.ClassicSkinVWLine3 & 0x80);
+        data.ClassicSkinVWLine4 = data.ClassicSkinVWLine4 & 0x7f;
+        data.ClassicSkinVWLine4Puff = Boolean(data.ClassicSkinVWLine4 & 0x80);
+
+        data.ClassicSkinTCLine1 = data.ClassicSkinTCLine1 & 0x7f;
+        data.ClassicSkinTCLine1Puff = Boolean(data.ClassicSkinTCLine1 & 0x80);
+        data.ClassicSkinTCLine2 = data.ClassicSkinTCLine2 & 0x7f;
+        data.ClassicSkinTCLine2Puff = Boolean(data.ClassicSkinTCLine2 & 0x80);
+        data.ClassicSkinTCLine3 = data.ClassicSkinTCLine3 & 0x7f;
+        data.ClassicSkinTCLine3Puff = Boolean(data.ClassicSkinTCLine3 & 0x80);
+        data.ClassicSkinTCLine4 = data.ClassicSkinTCLine4 & 0x7f;
+        data.ClassicSkinTCLine4Puff = Boolean(data.ClassicSkinTCLine4 & 0x80);
+
+        data.CircleSkinVWLine1 = data.CircleSkinVWLine1 & 0x7f;
+        data.CircleSkinVWLine2 = data.CircleSkinVWLine2 & 0x7f;
+        data.CircleSkinVWLine3 = data.CircleSkinVWLine3 & 0x7f;
+        data.CircleSkinVWLine3Puff = Boolean(data.CircleSkinVWLine3 & 0x80);
+
+        data.CircleSkinTCLine1 = data.CircleSkinTCLine1 & 0x7f;
+        data.CircleSkinTCLine2 = data.CircleSkinTCLine2 & 0x7f;
+        data.CircleSkinTCLine3 = data.CircleSkinTCLine3 & 0x7f;
+        data.CircleSkinTCLine3Puff = Boolean(data.CircleSkinTCLine3 & 0x80);
+
+        data.FoxySkinVWLine1 = data.FoxySkinVWLine1 & 0x7f;
+        data.FoxySkinVWLine1Puff = Boolean(data.FoxySkinVWLine1 & 0x80);
+        data.FoxySkinVWLine2 = data.FoxySkinVWLine2 & 0x7f;
+        data.FoxySkinVWLine2Puff = Boolean(data.FoxySkinVWLine2 & 0x80);
+        data.FoxySkinVWLine3 = data.FoxySkinVWLine3 & 0x7f;
+        data.FoxySkinVWLine3Puff = Boolean(data.FoxySkinVWLine3 & 0x80);
+
+        data.FoxySkinTCLine1 = data.FoxySkinTCLine1 & 0x7f;
+        data.FoxySkinTCLine1Puff = Boolean(data.FoxySkinTCLine1 & 0x80);
+        data.FoxySkinTCLine2 = data.FoxySkinTCLine2 & 0x7f;
+        data.FoxySkinTCLine2Puff = Boolean(data.FoxySkinTCLine2 & 0x80);
+        data.FoxySkinTCLine3 = data.FoxySkinTCLine3 & 0x7f;
+        data.FoxySkinTCLine3Puff = Boolean(data.FoxySkinTCLine3 & 0x80);
+
+        data.SmallSkinVWLine1 = data.SmallSkinVWLine1 & 0x7f;
+        data.SmallSkinVWLine1Puff = Boolean(data.SmallSkinVWLine1 & 0x80);
+        data.SmallSkinVWLine2 = data.SmallSkinVWLine2 & 0x7f;
+        data.SmallSkinVWLine2Puff = Boolean(data.SmallSkinVWLine2 & 0x80);
+
+        data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
+        data.SmallSkinTCLine1Puff = Boolean(data.SmallSkinTCLine1 & 0x80);
+        data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
+        data.SmallSkinTCLine2Puff = Boolean(data.SmallSkinTCLine2 & 0x80);
+
         buf = data.buf;
         delete data.buf;
         return {data, buf};
@@ -496,6 +567,8 @@ class ArcticFox extends events.EventEmitter {
             .word8u('ResetCountersOnStartup')
             .buffer('buf', buf.length)
             .vars;
+
+        data2.IsUsbCharge = Boolean(data2.IsUsbCharge);
 
         buf = data2.buf;
         delete data2.buf;

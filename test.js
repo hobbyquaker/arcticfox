@@ -3,7 +3,7 @@ const fox = require('./index.js');
 let interval;
 
 fox.on('connect', () => {
-    console.log('connect');
+    //console.log('connect');
 /*
     Interval = setInterval(() => {
         fox.readMonitoringData((err, data) => {
