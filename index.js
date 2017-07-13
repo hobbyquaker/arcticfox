@@ -2,6 +2,54 @@ const events = require('events');
 const binary = require('binary');
 const HID = require('node-hid');
 
+const products = {
+    E052: 'Joyetech eVic VTC Mini',
+    E043: 'Joyetech eVic VTwo',
+    E115: 'Joyetech eVic VTwo Mini',
+    E079: 'Joyetech eVic VTC Dual',
+    E150: 'Joyetech eVic Basic',
+    E092: 'Joyetech eVic AIO',
+    E182: 'Joyetech eVic Primo',
+    E203: 'Joyetech eVic Primo 2.0',
+    E196: 'Joyetech eVic Primo Mini',
+
+    E060: 'Joyetech Cuboid',
+    E056: 'Joyetech Cuboid Mini',
+    E166: 'Joyetech Cuboid 200',
+
+    E083: 'Joyetech eGrip II',
+
+    M973: 'Eleaf iStick QC 200W',
+    M972: 'Eleaf iStick TC200W',
+    M011: 'Eleaf iStick TC100W',
+    M041: 'Eleaf iStick Pico',
+    M038: 'Eleaf iStick Pico RDTA',
+    M045: 'Eleaf iStick Pico Mega',
+    M065: 'Eleaf iStick Pico Dual',
+    M046: 'Eleaf iStick Power',
+    M037: 'Eleaf ASTER',
+
+    W007: 'Wismec Presa TC75W',
+    W017: 'Wismec Presa TC100W',
+
+    W018: 'Wismec Reuleaux RX2/3',
+    W014: 'Wismec Reuleaux RX200',
+    W033: 'Wismec Reuleaux RX200S',
+    W026: 'Wismec Reuleaux RX75',
+    W069: 'Wismec Reuleaux RX300',
+    W073: 'Wismec Reuleaux RXmini',
+    W078: 'Wismec Predator',
+
+    W010: 'Vaporflask Classic',
+    W011: 'Vaporflask Lite',
+    W013: 'Vaporflask Stout',
+
+    W016: 'Beyondvape Centurion',
+    W043: 'Vaponaute La Petit Box',
+
+    W057: 'Vapor Shark SwitchBox RX'
+};
+
 class ArcticFox extends events.EventEmitter {
     constructor() {
         super();
@@ -10,6 +58,9 @@ class ArcticFox extends events.EventEmitter {
         this.connected = false;
         this.reconnectTimeout = 1000;
         this.callbackTimeout = 1000;
+
+        this.minimumSupportedBuildNumber = 170603;
+        this.supportedSettingsVersion = 9;
 
         this.vendorId = 0x0416;
         this.productId = 0x5020;
@@ -57,8 +108,10 @@ class ArcticFox extends events.EventEmitter {
                         if (this.callback) {
                             message = Buffer.concat([message, data]);
                             if (message.length >= this.configurationLength) {
-                                this.callback(null, this.parseConfiguration(message));
-                                this.callback = null;
+                                this.parseConfiguration(message, (err, config) => {
+                                    this.callback(err, config);
+                                    this.callback = null;
+                                });
                             }
                         }
                         break;
@@ -209,7 +262,6 @@ class ArcticFox extends events.EventEmitter {
         data.Resistance /= 1000;
         data.PreheatTime /= 100;
         data.PreheatDelay /= 10;
-        data.PreheatPower /= 10;
         data.Material = data.Flags & 0x0F;
         data.IsTemperatureDominant = Boolean(data.Flags & 0x10);
         data.IsCelcius = Boolean(data.Flags & 0x20);
@@ -223,7 +275,7 @@ class ArcticFox extends events.EventEmitter {
 
     parseDeviceInfo(buf) {
         const data = binary.parse(buf)
-            .word8u('Version')
+            .word8u('SettingsVersion')
             .buffer('ProductId', 4)
             .word32lu('HardwareVersion')
             .word16lu('MaxDevicePower')
@@ -235,6 +287,7 @@ class ArcticFox extends events.EventEmitter {
             .vars;
 
         data.ProductId = String(data.ProductId);
+        data.ProductName = products[data.ProductId];
         data.HardwareVersion = String(data.HardwareVersion / 100);
         data.MaxDevicePower /= 10;
 
@@ -258,43 +311,43 @@ class ArcticFox extends events.EventEmitter {
 
     parseUiConiguration(buf) {
         const data = binary.parse(buf)
-            .word8u('clicksVW0')
-            .word8u('clicksVW1')
-            .word8u('clicksVW2')
+            .word8u('ClicksVW0')
+            .word8u('ClicksVW1')
+            .word8u('ClicksVW2')
 
-            .word8u('clicksTC0')
-            .word8u('clicksTC1')
-            .word8u('clicksTC2')
+            .word8u('ClicksTC0')
+            .word8u('ClicksTC1')
+            .word8u('ClicksTC2')
 
-            .word8u('shortcutsVW0InStandby')
-            .word8u('shortcutsVW0InEditMain')
-            .word8u('shortcutsVW0InSelector')
-            .word8u('shortcutsVW0InMenu')
+            .word8u('ShortcutsVW0InStandby')
+            .word8u('ShortcutsVW0InEditMain')
+            .word8u('ShortcutsVW0InSelector')
+            .word8u('ShortcutsVW0InMenu')
 
-            .word8u('shortcutsVW1InStandby')
-            .word8u('shortcutsVW1InEditMain')
-            .word8u('shortcutsVW1InSelector')
-            .word8u('shortcutsVW1InMenu')
+            .word8u('ShortcutsVW1InStandby')
+            .word8u('ShortcutsVW1InEditMain')
+            .word8u('ShortcutsVW1InSelector')
+            .word8u('ShortcutsVW1InMenu')
 
-            .word8u('shortcutsVW2InStandby')
-            .word8u('shortcutsVW2InEditMain')
-            .word8u('shortcutsVW2InSelector')
-            .word8u('shortcutsVW2InMenu')
+            .word8u('ShortcutsVW2InStandby')
+            .word8u('ShortcutsVW2InEditMain')
+            .word8u('ShortcutsVW2InSelector')
+            .word8u('ShortcutsVW2InMenu')
 
-            .word8u('shortcutsTC0InStandby')
-            .word8u('shortcutsTC0InEditMain')
-            .word8u('shortcutsTC0InSelector')
-            .word8u('shortcutsTC0InMenu')
+            .word8u('ShortcutsTC0InStandby')
+            .word8u('ShortcutsTC0InEditMain')
+            .word8u('ShortcutsTC0InSelector')
+            .word8u('ShortcutsTC0InMenu')
 
-            .word8u('shortcutsTC1InStandby')
-            .word8u('shortcutsTC1InEditMain')
-            .word8u('shortcutsTC1InSelector')
-            .word8u('shortcutsTC1InMenu')
+            .word8u('ShortcutsTC1InStandby')
+            .word8u('ShortcutsTC1InEditMain')
+            .word8u('ShortcutsTC1InSelector')
+            .word8u('ShortcutsTC1InMenu')
 
-            .word8u('shortcutsTC2InStandby')
-            .word8u('shortcutsTC2InEditMain')
-            .word8u('shortcutsTC2InSelector')
-            .word8u('shortcutsTC2InMenu')
+            .word8u('ShortcutsTC2InStandby')
+            .word8u('ShortcutsTC2InEditMain')
+            .word8u('ShortcutsTC2InSelector')
+            .word8u('ShortcutsTC2InMenu')
 
             .word8u('ClassicSkinVWLine1')
             .word8u('ClassicSkinVWLine2')
@@ -387,57 +440,57 @@ class ArcticFox extends events.EventEmitter {
         data.ShowScreensaverInStealth = Boolean(data.ShowScreensaverInStealth);
         data.ClockOnClickInStealth = Boolean(data.ClockOnClickInStealth);
 
-        data.ClassicSkinVWLine1 = data.ClassicSkinVWLine1 & 0x7f;
         data.ClassicSkinVWLine1Puff = Boolean(data.ClassicSkinVWLine1 & 0x80);
-        data.ClassicSkinVWLine2 = data.ClassicSkinVWLine2 & 0x7f;
+        data.ClassicSkinVWLine1 = data.ClassicSkinVWLine1 & 0x7f;
         data.ClassicSkinVWLine2Puff = Boolean(data.ClassicSkinVWLine2 & 0x80);
-        data.ClassicSkinVWLine3 = data.ClassicSkinVWLine3 & 0x7f;
+        data.ClassicSkinVWLine2 = data.ClassicSkinVWLine2 & 0x7f;
         data.ClassicSkinVWLine3Puff = Boolean(data.ClassicSkinVWLine3 & 0x80);
-        data.ClassicSkinVWLine4 = data.ClassicSkinVWLine4 & 0x7f;
+        data.ClassicSkinVWLine3 = data.ClassicSkinVWLine3 & 0x7f;
         data.ClassicSkinVWLine4Puff = Boolean(data.ClassicSkinVWLine4 & 0x80);
+        data.ClassicSkinVWLine4 = data.ClassicSkinVWLine4 & 0x7f;
 
-        data.ClassicSkinTCLine1 = data.ClassicSkinTCLine1 & 0x7f;
         data.ClassicSkinTCLine1Puff = Boolean(data.ClassicSkinTCLine1 & 0x80);
-        data.ClassicSkinTCLine2 = data.ClassicSkinTCLine2 & 0x7f;
+        data.ClassicSkinTCLine1 = data.ClassicSkinTCLine1 & 0x7f;
         data.ClassicSkinTCLine2Puff = Boolean(data.ClassicSkinTCLine2 & 0x80);
-        data.ClassicSkinTCLine3 = data.ClassicSkinTCLine3 & 0x7f;
+        data.ClassicSkinTCLine2 = data.ClassicSkinTCLine2 & 0x7f;
         data.ClassicSkinTCLine3Puff = Boolean(data.ClassicSkinTCLine3 & 0x80);
-        data.ClassicSkinTCLine4 = data.ClassicSkinTCLine4 & 0x7f;
+        data.ClassicSkinTCLine3 = data.ClassicSkinTCLine3 & 0x7f;
         data.ClassicSkinTCLine4Puff = Boolean(data.ClassicSkinTCLine4 & 0x80);
+        data.ClassicSkinTCLine4 = data.ClassicSkinTCLine4 & 0x7f;
 
         data.CircleSkinVWLine1 = data.CircleSkinVWLine1 & 0x7f;
         data.CircleSkinVWLine2 = data.CircleSkinVWLine2 & 0x7f;
-        data.CircleSkinVWLine3 = data.CircleSkinVWLine3 & 0x7f;
         data.CircleSkinVWLine3Puff = Boolean(data.CircleSkinVWLine3 & 0x80);
+        data.CircleSkinVWLine3 = data.CircleSkinVWLine3 & 0x7f;
 
         data.CircleSkinTCLine1 = data.CircleSkinTCLine1 & 0x7f;
         data.CircleSkinTCLine2 = data.CircleSkinTCLine2 & 0x7f;
-        data.CircleSkinTCLine3 = data.CircleSkinTCLine3 & 0x7f;
         data.CircleSkinTCLine3Puff = Boolean(data.CircleSkinTCLine3 & 0x80);
+        data.CircleSkinTCLine3 = data.CircleSkinTCLine3 & 0x7f;
 
-        data.FoxySkinVWLine1 = data.FoxySkinVWLine1 & 0x7f;
         data.FoxySkinVWLine1Puff = Boolean(data.FoxySkinVWLine1 & 0x80);
-        data.FoxySkinVWLine2 = data.FoxySkinVWLine2 & 0x7f;
+        data.FoxySkinVWLine1 = data.FoxySkinVWLine1 & 0x7f;
         data.FoxySkinVWLine2Puff = Boolean(data.FoxySkinVWLine2 & 0x80);
-        data.FoxySkinVWLine3 = data.FoxySkinVWLine3 & 0x7f;
+        data.FoxySkinVWLine2 = data.FoxySkinVWLine2 & 0x7f;
         data.FoxySkinVWLine3Puff = Boolean(data.FoxySkinVWLine3 & 0x80);
+        data.FoxySkinVWLine3 = data.FoxySkinVWLine3 & 0x7f;
 
-        data.FoxySkinTCLine1 = data.FoxySkinTCLine1 & 0x7f;
         data.FoxySkinTCLine1Puff = Boolean(data.FoxySkinTCLine1 & 0x80);
-        data.FoxySkinTCLine2 = data.FoxySkinTCLine2 & 0x7f;
+        data.FoxySkinTCLine1 = data.FoxySkinTCLine1 & 0x7f;
         data.FoxySkinTCLine2Puff = Boolean(data.FoxySkinTCLine2 & 0x80);
-        data.FoxySkinTCLine3 = data.FoxySkinTCLine3 & 0x7f;
+        data.FoxySkinTCLine2 = data.FoxySkinTCLine2 & 0x7f;
         data.FoxySkinTCLine3Puff = Boolean(data.FoxySkinTCLine3 & 0x80);
+        data.FoxySkinTCLine3 = data.FoxySkinTCLine3 & 0x7f;
 
-        data.SmallSkinVWLine1 = data.SmallSkinVWLine1 & 0x7f;
         data.SmallSkinVWLine1Puff = Boolean(data.SmallSkinVWLine1 & 0x80);
-        data.SmallSkinVWLine2 = data.SmallSkinVWLine2 & 0x7f;
+        data.SmallSkinVWLine1 = data.SmallSkinVWLine1 & 0x7f;
         data.SmallSkinVWLine2Puff = Boolean(data.SmallSkinVWLine2 & 0x80);
+        data.SmallSkinVWLine2 = data.SmallSkinVWLine2 & 0x7f;
 
-        data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
         data.SmallSkinTCLine1Puff = Boolean(data.SmallSkinTCLine1 & 0x80);
-        data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
+        data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
         data.SmallSkinTCLine2Puff = Boolean(data.SmallSkinTCLine2 & 0x80);
+        data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
 
         buf = data.buf;
         delete data.buf;
@@ -569,6 +622,7 @@ class ArcticFox extends events.EventEmitter {
             .vars;
 
         data2.IsUsbCharge = Boolean(data2.IsUsbCharge);
+        data2.ResetCountersOnStartup = Boolean(data2.ResetCountersOnStartup);
 
         buf = data2.buf;
         delete data2.buf;
@@ -587,7 +641,7 @@ class ArcticFox extends events.EventEmitter {
             .buffer('buf', buf.length)
             .vars;
 
-        data.PuffCutOff = pcores.PuffCutOff;
+        data.PuffCutOff = pcores.PuffCutOff / 10;
         buf = pcores.buf;
 
         data.PowerCurves = [];
@@ -615,6 +669,8 @@ class ArcticFox extends events.EventEmitter {
         buf = data3.buf;
         delete data3.buf;
 
+        data3.CheckTCR = Boolean(data3.CheckTCR);
+        data3.UsbNoSleep = Boolean(data3.UsbNoSleep);
         data3.PowerLimit /= 10;
         data3.InternalResistance /= 1000;
 
@@ -623,10 +679,18 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
-    parseConfiguration(buf) {
+    parseConfiguration(buf, callback) {
         // See https://github.com/TBXin/NFirmwareEditor/blob/master/src/NToolbox/Models/ArcticFoxConfiguration.cs
         let res = this.parseDeviceInfo(buf);
         const data = res.data;
+
+        if (data.SettingsVersion > this.supportedSettingsVersion) {
+            callback(new Error('Outdated Toolbox'));
+            return;
+        } else if ((data.FirmwareBuild < this.minimumSupportedBuildNumber) || (data.SettingsVersion < this.supportedSettingsVersion)) {
+            callback(new Error('Outdated Firmware'));
+            return;
+        }
 
         data.profiles = [];
         for (let i = 0; i < 8; i++) {
@@ -643,7 +707,7 @@ class ArcticFox extends events.EventEmitter {
         res = this.parseAdvancedConfiguration(res.buf);
         this.extend(data, res.data);
 
-        return data;
+        callback(null, data);
     }
 
     extend(obj1, obj2) {
