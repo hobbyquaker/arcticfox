@@ -14,8 +14,23 @@ by https://nfeteam.org/
 
 Ported to Javascript from https://github.com/TBXin/NFirmwareEditor
 
+See [test.js](test.js) for examples...
 
-Work in progress... See [test.js](test.js) for examples...
+__Versioning:__ The major number of this libs version reflects the SettingsVersion it is made for.
+
+
+## Related
+
+* https://github.com/hobbyquaker/arcticfox-monitor - A device monitoring tool for vape battery mods with Arcticfox firmware. Works on macOS and Linux.
+* https://github.com/hobbyquaker/arcticfox-config - Configuration Tool for Vape Devices / Battery Mods with Arcticfox 
+Firmware. Works on MacOS and Linux.
+
+## Credits
+
+Based on the work of [NFE Team](https://nfeteam.org/)
+
+* https://github.com/maelstrom2001/ArcticFox
+* https://github.com/TBXin/NFirmwareEditor
 
 
 ## License
