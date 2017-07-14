@@ -1,16 +1,17 @@
 {
   "name": "arcticfox",
-  "version": "0.0.6",
+  "version": "9.0.0",
   "description": "Module that abstracts the HID communication with the ArcticFox firmware",
   "main": "index.js",
   "scripts": {
     "test": "camo-purge; xo --space 4 --ignore test.js"
   },
   "author": "Sebastian Raff <hq@ccu.io>",
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "dependencies": {
     "binary": "^0.3.0",
-    "node-hid": "^0.5.4"
+    "node-hid": "^0.5.4",
+    "put": "0.0.6"
   },
   "devDependencies": {
     "camo-purge": "latest",
