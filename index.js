@@ -1,5 +1,6 @@
 const events = require('events');
 const binary = require('binary');
+const put = require('put');
 const HID = require('node-hid');
 
 const products = {
@@ -64,6 +65,7 @@ class ArcticFox extends events.EventEmitter {
 
         this.vendorId = 0x0416;
         this.productId = 0x5020;
+
         this.dataflashLength = 2048;
         this.configurationLength = 1088;
         this.monitoringDataLength = 64;
@@ -129,7 +131,9 @@ class ArcticFox extends events.EventEmitter {
             });
             this.hid.on('error', err => {
                 this.emit('error', err);
-                // This.disconnect();
+                if (err.toString() === 'Error: could not read from HID device') {
+                    this.disconnect();
+                }
             });
             this.connected = true;
             this.emit('connect');
@@ -237,7 +241,44 @@ class ArcticFox extends events.EventEmitter {
         return data;
     }
 
+    encodeProfile(profile) {
+        let flags = profile.Material;
+        if (profile.IsTemperatureDominant) {
+            flags += 0x10;
+        }
+        if (profile.IsCelcius) {
+            flags += 0x20;
+        }
+        if (profile.IsResistanceLocked) {
+            flags += 0x40;
+        }
+        if (profile.IsEnabled) {
+            flags += 0x80;
+        }
+
+        let bin = put()
+            .put(Buffer.from((profile.Name + '\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').substr(0, 8), 'ascii'))
+            .word8(flags)
+            .word8(profile.PreheatType)
+            .word8(profile.SelectedCurve)
+            .word8(profile.PreheatTime * 100)
+            .word8(profile.PreheatDelay * 10)
+            .word16le(profile.PreheatPower)
+            .word16le(profile.Power * 10)
+            .word16le(profile.Temperature)
+            .word16le(profile.Resistance * 1000)
+            .word16le(profile.TCR)
+            .word8(profile.PIRegulatorIsEnabled)
+            .word8(profile.PIRegulatorRange)
+            .word16le(profile.PIRegulatorPValue)
+            .word16le(profile.PIRegulatorIValue)
+            .buffer();
+
+        return bin;
+    }
+
     parseProfile(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 8)
             .word8('Flags')
@@ -273,7 +314,22 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeDeviceInfo(config) {
+        let bin = put()
+            .word8(config.SettingsVersion)
+            .put(Buffer.from(config.ProductId, 'ascii'))
+            .word32le(Number(config.HardwareVersion) * 100)
+            .word16le(config.MaxDevicePower * 10)
+            .word8(config.NumberOfBatteries)
+            .word8(config.DisplaySize)
+            .word32le(config.FirmwareVersion)
+            .word32le(config.FirmwareBuild)
+            .buffer();
+        return bin;
+    }
+
     parseDeviceInfo(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .word8u('SettingsVersion')
             .buffer('ProductId', 4)
@@ -296,7 +352,18 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeGeneralConfiguration(config) {
+        let bin = put()
+            .word8(config.SelectedProfile)
+            .word8(config.SmartMode)
+            .word8(config.SmartRange)
+            .buffer();
+
+        return bin;
+    }
+
     parseGeneralConfiguration(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .word8u('SelectedProfile')
             .word8u('SmartMode')
@@ -309,7 +376,129 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeUiConfiguration(config) {
+        let bin = put()
+
+            .word8(config.ClicksVW0)
+            .word8(config.ClicksVW1)
+            .word8(config.ClicksVW2)
+
+            .word8(config.ClicksTC0)
+            .word8(config.ClicksTC1)
+            .word8(config.ClicksTC2)
+
+            .word8(config.ShortcutsVW0InStandby)
+            .word8(config.ShortcutsVW0InEditMain)
+            .word8(config.ShortcutsVW0InSelector)
+            .word8(config.ShortcutsVW0InMenu)
+
+            .word8(config.ShortcutsVW1InStandby)
+            .word8(config.ShortcutsVW1InEditMain)
+            .word8(config.ShortcutsVW1InSelector)
+            .word8(config.ShortcutsVW1InMenu)
+
+            .word8(config.ShortcutsVW2InStandby)
+            .word8(config.ShortcutsVW2InEditMain)
+            .word8(config.ShortcutsVW2InSelector)
+            .word8(config.ShortcutsVW2InMenu)
+
+            .word8(config.ShortcutsTC0InStandby)
+            .word8(config.ShortcutsTC0InEditMain)
+            .word8(config.ShortcutsTC0InSelector)
+            .word8(config.ShortcutsTC0InMenu)
+
+            .word8(config.ShortcutsTC1InStandby)
+            .word8(config.ShortcutsTC1InEditMain)
+            .word8(config.ShortcutsTC1InSelector)
+            .word8(config.ShortcutsTC1InMenu)
+
+            .word8(config.ShortcutsTC2InStandby)
+            .word8(config.ShortcutsTC2InEditMain)
+            .word8(config.ShortcutsTC2InSelector)
+            .word8(config.ShortcutsTC2InMenu)
+
+            .word8(config.ClassicSkinVWLine1 + (config.ClassicSkinVWLine1Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinVWLine2 + (config.ClassicSkinVWLine2Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinVWLine3 + (config.ClassicSkinVWLine3Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinVWLine4 + (config.ClassicSkinVWLine4Puff ? 0x80 : 0))
+
+            .word8(config.ClassicSkinTCLine1 + (config.ClassicSkinTCLine1Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinTCLine2 + (config.ClassicSkinTCLine2Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinTCLine3 + (config.ClassicSkinTCLine3Puff ? 0x80 : 0))
+            .word8(config.ClassicSkinTCLine4 + (config.ClassicSkinTCLine4Puff ? 0x80 : 0))
+
+            .word8(config.CircleSkinVWLine1)
+            .word8(config.CircleSkinVWLine2)
+            .word8(config.CircleSkinVWLine3 + (config.CircleSkinVWLine3Puff ? 0x80 : 0))
+
+            .word8(config.CircleSkinTCLine1)
+            .word8(config.CircleSkinTCLine2)
+            .word8(config.CircleSkinTCLine3 + (config.CircleSkinTCLine3Puff ? 0x80 : 0))
+
+            .word8(config.FoxySkinVWLine1 + (config.FoxySkinVWLine1Puff ? 0x80 : 0))
+            .word8(config.FoxySkinVWLine2 + (config.FoxySkinVWLine2Puff ? 0x80 : 0))
+            .word8(config.FoxySkinVWLine3 + (config.FoxySkinVWLine3Puff ? 0x80 : 0))
+
+            .word8(config.FoxySkinTCLine1 + (config.FoxySkinTCLine1Puff ? 0x80 : 0))
+            .word8(config.FoxySkinTCLine2 + (config.FoxySkinTCLine2Puff ? 0x80 : 0))
+            .word8(config.FoxySkinTCLine3 + (config.FoxySkinTCLine3Puff ? 0x80 : 0))
+
+            .word8(config.SmallSkinVWLine1 + (config.SmallSkinVWLine1Puff ? 0x80 : 0))
+            .word8(config.SmallSkinVWLine2 + (config.SmallSkinVWLine2Puff ? 0x80 : 0))
+
+            .word8(config.SmallSkinTCLine1 + (config.SmallSkinTCLine1Puff ? 0x80 : 0))
+            .word8(config.SmallSkinTCLine2 + (config.SmallSkinTCLine2Puff ? 0x80 : 0))
+
+            .word8(config.Brightness)
+            .word8(config.DimTimeout)
+            .word8(config.DimTimeoutLocked)
+            .word8(config.DimTimeoutCharging)
+            .word8(config.ShowLogoDelay)
+            .word8(config.ShowClockDelay)
+
+            .word8(config.IsFlipped ? 1 : 0)
+            .word8(config.IsStealthMode ? 1 : 0)
+            .word8(config.WakeUpByPlusMinus ? 1 : 0)
+            .word8(config.IsPowerStep1W ? 1 : 0)
+            .word8(config.IsTemperatureStep1C2F ? 1 : 0)
+
+            .word8(config.ChargeScreenType)
+            .word8(config.ChargeExtraType)
+
+            .word8(config.IsLogoEnabled ? 1 : 0)
+            .word8(config.IsClassicMenu ? 1 : 0)
+
+            .word8(config.ClockType)
+            .word8(config.IsClockOnMainScreen ? 1 : 0)
+
+            .word8(config.ScreensaveDuration)
+            .word8(config.PuffScreenDelay)
+            .word8(config.PuffsTimeFormat)
+
+            .word8(config.MainScreenSkin)
+            .word8(config.IsUpDownSwapped ? 1 : 0)
+            .word8(config.ShowChargingInStealth ? 1 : 0)
+            .word8(config.ShowScreensaverInStealth)
+            .word8(config.ClockOnClickInStealth ? 1 : 0)
+            .word8(config.FiveClicks)
+
+            .word32le(config.PuffsCount)
+            .word32le(config.PuffsTime)
+
+            .word16le(config.Year)
+            .word8(config.Month)
+            .word8(config.Day)
+            .word8(config.Hour)
+            .word8(config.Minute)
+            .word8(config.Second)
+        
+            .buffer();
+
+        return bin;
+    }
+
     parseUiConiguration(buf) {
+        var l = buf.length;
         const data = binary.parse(buf)
             .word8u('ClicksVW0')
             .word8u('ClicksVW1')
@@ -494,10 +683,33 @@ class ArcticFox extends events.EventEmitter {
 
         buf = data.buf;
         delete data.buf;
+
         return {data, buf};
     }
 
+    encodeCustomBattery(battery) {
+        let bin = put()
+            .put(Buffer.from((battery.Name + '\u0000\u0000\u0000\u0000').substr(0, 4), 'ascii'))
+            .buffer();
+
+        for (let i = 0; i < 11; i++) {
+            bin = Buffer.concat([bin, put()
+                .word16le(battery.PercentsVoltage[i].Percents)
+                .word16le(battery.PercentsVoltage[i].Voltage * 100)
+                .buffer()
+            ]);
+        }
+
+        bin = Buffer.concat([bin, put()
+            .word16le(battery.Cutoff * 100)
+            .buffer()
+        ]);
+
+        return bin;
+    }
+
     parseCustomBattery(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 4)
             .buffer('buf', buf.length)
@@ -535,7 +747,24 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeTFRTable(table) {
+        let bin = put()
+            .put(Buffer.from((table.Name + '\u0000\u0000\u0000\u0000').substr(0, 4), 'ascii'))
+            .buffer();
+
+        for (let i = 0; i < 7; i++) {
+            bin = Buffer.concat([bin, put()
+                .word16le(table.Points[i].Temperature)
+                .word16le(table.Points[i].Factor * 10000)
+                .buffer()
+            ]);
+        }
+
+        return bin;
+    }
+
     parseTFRTable(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 4)
             .buffer('buf', buf.length)
@@ -565,7 +794,24 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodePowerCurve(curve) {
+        let bin = put()
+            .put(Buffer.from((curve.Name + '\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').substr(0, 8), 'ascii'))
+            .buffer();
+
+        for (let i = 0; i < 12; i++) {
+            bin = Buffer.concat([bin, put()
+                .word8(curve.Points[i].Time * 10)
+                .word8(curve.Points[i].Percent)
+                .buffer()
+            ]);
+        }
+
+        return bin;
+    }
+
     parsePowerCurve(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 8)
             .buffer('buf', buf.length)
@@ -595,7 +841,55 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeAdvancedConfiguration(config) {
+        let bin = put()
+            .word8(config.ShuntCorrection)
+            .word8(config.BatteryModel)
+            .buffer();
+
+        for (let i = 0; i < 3; i++) {
+            bin = Buffer.concat([bin, this.encodeCustomBattery(config.CustomBatteryProfiles[i])])
+        }
+
+        bin = Buffer.concat([bin, put()
+            .word8(config.RtcMode)
+            .word8(config.IsUsbCharge ? 1 : 0)
+            .word8(config.ResetCountersOnStartup ? 1 : 0)
+            .buffer()
+        ]);
+
+        for (let i = 0; i < 8; i++) {
+            bin = Buffer.concat([bin, this.encodeTFRTable(config.TFRTables[i])])
+        }
+
+        bin = Buffer.concat([bin, put()
+            .word8(config.PuffCutOff * 10)
+            .buffer()
+        ]);
+
+        for (let i = 0; i < 8; i++) {
+            bin = Buffer.concat([bin, this.encodePowerCurve(config.PowerCurves[i])])
+        }
+
+        bin = Buffer.concat([bin, put()
+            .word8((((config.BatteryVoltageOffset1 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset1 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset2 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset2 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset3 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset3 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset4 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset4 * 100) & 0x7f))
+            .word8(config.CheckTCR ? 1 : 0)
+            .word8(config.UsbNoSleep ? 1 : 0)
+            .word8(config.DeepSleepMode)
+            .word8(config.DeepSleepDelay)
+            .word16le(config.PowerLimit * 10)
+            .word8(config.InternalResistance * 1000)
+            .buffer()
+        ]);
+
+        return bin;
+    }
+
     parseAdvancedConfiguration(buf) {
+        const l = buf.length;
         const data = binary.parse(buf)
             .word8u('ShuntCorrection')
             .word8u('BatteryModel')
@@ -669,6 +963,11 @@ class ArcticFox extends events.EventEmitter {
         buf = data3.buf;
         delete data3.buf;
 
+        data3.BatteryVoltageOffset1 /= 100;
+        data3.BatteryVoltageOffset2 /= 100;
+        data3.BatteryVoltageOffset3 /= 100;
+        data3.BatteryVoltageOffset4 /= 100;
+
         data3.CheckTCR = Boolean(data3.CheckTCR);
         data3.UsbNoSleep = Boolean(data3.UsbNoSleep);
         data3.PowerLimit /= 10;
@@ -679,7 +978,38 @@ class ArcticFox extends events.EventEmitter {
         return {data, buf};
     }
 
+    encodeConfiguration(config) {
+        let bin = Buffer.from([]);
+        bin = Buffer.concat([bin, this.encodeDeviceInfo(config)]);
+        for (let i = 0; i < 8; i++) {
+            bin = Buffer.concat([bin, this.encodeProfile(config.profiles[i])]);
+        }
+
+        bin = Buffer.concat([bin, this.encodeGeneralConfiguration(config)]);
+
+        bin = Buffer.concat([bin, this.encodeUiConfiguration(config)]);
+
+        bin = Buffer.concat([bin, this.encodeAdvancedConfiguration(config)]);
+
+        bin = Buffer.concat([bin, Buffer.from(Array.apply(null, Array(58)).map(Number.prototype.valueOf, 0))]);
+
+        //this.saveDump('b.bin', bin);
+
+        return Array.prototype.slice.call(bin, 0);
+    }
+
+    saveDump(file, buf) {
+        let str = buf.toString('hex');
+        let out = '';
+        for (let i = 0; i < str.length; i += 32) {
+            out += (str.substr(i, 32) + '\n');
+        }
+        require('fs').writeFileSync(file, out);
+    }
+
     parseConfiguration(buf, callback) {
+        //this.saveDump('a.bin', buf);
+
         // See https://github.com/TBXin/NFirmwareEditor/blob/master/src/NToolbox/Models/ArcticFoxConfiguration.cs
         let res = this.parseDeviceInfo(buf);
         const data = res.data;
@@ -779,6 +1109,11 @@ class ArcticFox extends events.EventEmitter {
         } else {
             callback(new Error());
         }
+    }
+
+    writeConfiguration(config) {
+        return this.hidWrite(this.createCommand(this.commands.writeConfiguration, 0, this.configurationLength)) &&
+            this.hidWrite(this.encodeConfiguration(config));
     }
 
 }
