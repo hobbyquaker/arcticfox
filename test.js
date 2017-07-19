@@ -1,4 +1,5 @@
 const fox = require('./index.js');
+const fs = require('fs');
 
 let interval;
 
@@ -26,23 +27,25 @@ fox.on('connect', () => {
         console.log(err, data);
     });
 
- */
+
     //fox.setDateTime(new Date());
+    //console.log('connect');
     fox.readConfiguration((err, data) => {
         console.log(JSON.stringify(data, null, '  '));
     });
-
+ */
 
 
 });
 
 fox.on('error', err => {
-    console.log(err.message);
+    //console.log(err.message);
 });
 
 fox.on('close', () => {
-    console.log('close');
+    //console.log('close');
     clearInterval(interval);
 });
 
-fox.connect();
+//fox.connect();
+

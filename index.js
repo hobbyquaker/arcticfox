@@ -143,6 +143,9 @@ class ArcticFox extends events.EventEmitter {
     }
 
     disconnect() {
+        if (this.hid && this.hid.close) {
+            this.hid.close();
+        }
         if (this.connected) {
             this.connected = false;
             this.emit('close');
