@@ -452,7 +452,7 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.SmallSkinTCLine1 + (config.SmallSkinTCLine1Puff ? 0x80 : 0))
             .word8(config.SmallSkinTCLine2 + (config.SmallSkinTCLine2Puff ? 0x80 : 0))
 
-            .word8(config.Brightness)
+            .word8(Math.round(config.Brightness * 2.55))
             .word8(config.DimTimeout)
             .word8(config.DimTimeoutLocked)
             .word8(config.DimTimeoutCharging)
@@ -683,6 +683,8 @@ class ArcticFox extends events.EventEmitter {
         data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
         data.SmallSkinTCLine2Puff = Boolean(data.SmallSkinTCLine2 & 0x80);
         data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
+
+        data.Brightness = Math.round(data.Brightness / 2.55);
 
         buf = data.buf;
         delete data.buf;
