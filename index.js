@@ -142,6 +142,16 @@ class ArcticFox extends events.EventEmitter {
         }
     }
 
+    close() {
+        if (this.hid && this.hid.close) {
+            this.hid.close();
+        }
+        if (this.connected) {
+            this.connected = false;
+            this.emit('close');
+        }
+    }
+
     disconnect() {
         if (this.hid && this.hid.close) {
             this.hid.close();
@@ -475,7 +485,7 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.IsClockOnMainScreen ? 1 : 0)
 
             .word8(config.ScreensaveDuration)
-            .word8(config.PuffScreenDelay)
+            .word8(Math.round(config.PuffScreenDelay * 10))
             .word8(config.PuffsTimeFormat)
 
             .word8(config.MainScreenSkin)
@@ -685,6 +695,7 @@ class ArcticFox extends events.EventEmitter {
         data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
 
         data.Brightness = Math.round(data.Brightness / 2.55);
+        data.PuffScreenDelay = Math.round(data.PuffScreenDelay / 10);
 
         buf = data.buf;
         delete data.buf;
@@ -868,7 +879,7 @@ class ArcticFox extends events.EventEmitter {
         }
 
         bin = Buffer.concat([bin, put()
-            .word8(config.PuffCutOff * 10)
+            .word8(Math.round(config.PuffCutOff * 10))
             .buffer()
         ]);
 
@@ -940,7 +951,7 @@ class ArcticFox extends events.EventEmitter {
             .buffer('buf', buf.length)
             .vars;
 
-        data.PuffCutOff = pcores.PuffCutOff / 10;
+        data.PuffCutOff = Math.round(pcores.PuffCutOff / 10);
         buf = pcores.buf;
 
         data.PowerCurves = [];
