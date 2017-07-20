@@ -60,8 +60,8 @@ class ArcticFox extends events.EventEmitter {
         this.reconnectTimeout = 1000;
         this.callbackTimeout = 1000;
 
-        this.minimumSupportedBuildNumber = 170603;
-        this.supportedSettingsVersion = 9;
+        this.minimumSupportedBuildNumber = 170624;
+        this.supportedSettingsVersion = 10;
 
         this.vendorId = 0x0416;
         this.productId = 0x5020;
@@ -462,6 +462,15 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.SmallSkinTCLine1 + (config.SmallSkinTCLine1Puff ? 0x80 : 0))
             .word8(config.SmallSkinTCLine2 + (config.SmallSkinTCLine2Puff ? 0x80 : 0))
 
+            .word8(config.MediumSkinVWLine1 + (config.MediumSkinVWLine1Puff ? 0x80 : 0))
+            .word8(config.MediumSkinVWLine2 + (config.MediumSkinVWLine2Puff ? 0x80 : 0))
+            .word8(config.MediumSkinVWLine3 + (config.MediumSkinVWLine2Puff ? 0x80 : 0))
+
+            .word8(config.MediumSkinTCLine1 + (config.MediumSkinTCLine1Puff ? 0x80 : 0))
+            .word8(config.MediumSkinTCLine2 + (config.MediumSkinTCLine2Puff ? 0x80 : 0))
+            .word8(config.MediumSkinTCLine3 + (config.MediumSkinTCLine2Puff ? 0x80 : 0))
+
+
             .word8(Math.round(config.Brightness * 2.55))
             .word8(config.DimTimeout)
             .word8(config.DimTimeoutLocked)
@@ -583,6 +592,14 @@ class ArcticFox extends events.EventEmitter {
             .word8u('SmallSkinTCLine1')
             .word8u('SmallSkinTCLine2')
 
+            .word8u('MediumSkinVWLine1')
+            .word8u('MediumSkinVWLine2')
+            .word8u('MediumSkinVWLine3')
+
+            .word8u('MediumSkinTCLine1')
+            .word8u('MediumSkinTCLine2')
+            .word8u('MediumSkinTCLine3')
+
             .word8u('Brightness')
             .word8u('DimTimeout')
             .word8u('DimTimeoutLocked')
@@ -693,6 +710,20 @@ class ArcticFox extends events.EventEmitter {
         data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
         data.SmallSkinTCLine2Puff = Boolean(data.SmallSkinTCLine2 & 0x80);
         data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
+
+        data.MediumSkinVWLine1Puff = Boolean(data.MediumSkinVWLine1 & 0x80);
+        data.MediumSkinVWLine1 = data.MediumSkinVWLine1 & 0x7f;
+        data.MediumSkinVWLine2Puff = Boolean(data.MediumSkinVWLine2 & 0x80);
+        data.MediumSkinVWLine2 = data.MediumSkinVWLine2 & 0x7f;
+        data.MediumSkinVWLine3Puff = Boolean(data.MediumSkinVWLine3 & 0x80);
+        data.MediumSkinVWLine3 = data.MediumSkinVWLine3 & 0x7f;
+
+        data.MediumSkinTCLine1Puff = Boolean(data.MediumSkinTCLine1 & 0x80);
+        data.MediumSkinTCLine1 = data.MediumSkinTCLine1 & 0x7f;
+        data.MediumSkinTCLine2Puff = Boolean(data.MediumSkinTCLine2 & 0x80);
+        data.MediumSkinTCLine2 = data.MediumSkinTCLine2 & 0x7f;
+        data.MediumSkinTCLine3Puff = Boolean(data.MediumSkinTCLine3 & 0x80);
+        data.MediumSkinTCLine3 = data.MediumSkinTCLine3 & 0x7f;
 
         data.Brightness = Math.round(data.Brightness / 2.55);
         data.PuffScreenDelay = Math.round(data.PuffScreenDelay / 10);
@@ -1007,7 +1038,7 @@ class ArcticFox extends events.EventEmitter {
 
         bin = Buffer.concat([bin, this.encodeAdvancedConfiguration(config)]);
 
-        bin = Buffer.concat([bin, Buffer.from(Array.apply(null, Array(58)).map(Number.prototype.valueOf, 0))]);
+        bin = Buffer.concat([bin, Buffer.from(Array.apply(null, Array(this.configurationLength - bin.length)).map(Number.prototype.valueOf, 0))]);
 
         //this.saveDump('b.bin', bin);
 
