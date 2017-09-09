@@ -295,6 +295,7 @@ class ArcticFox extends events.EventEmitter {
         const data = binary.parse(buf)
             .buffer('Name', 8)
             .word8('Flags')
+            .word8('Flags2')
             .word8('PreheatType')
             .word8('SelectedCurve')
             .word8('PreheatTime')
@@ -318,9 +319,12 @@ class ArcticFox extends events.EventEmitter {
         data.PreheatDelay /= 10;
         data.Material = data.Flags & 0x0F;
         data.IsTemperatureDominant = Boolean(data.Flags & 0x10);
-        data.IsCelcius = Boolean(data.Flags & 0x20);
         data.IsResistanceLocked = Boolean(data.Flags & 0x40);
         data.IsEnabled = Boolean(data.Flags & 0x80);
+
+        data.IsPIEnabled = Boolean(data.Flag2 & 0x01);
+        data.IsPowerStep1W = Boolean(data.Flag2 & 0x02);
+        data.IsTemperatureStep1C2F = Boolean(data.Flag2 & 0x04);
 
         buf = data.buf;
         delete data.buf;
