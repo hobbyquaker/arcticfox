@@ -918,7 +918,24 @@ class ArcticFox extends events.EventEmitter {
 
     encodeAdvancedConfiguration(config) {
         let bin = put()
+            .word16le(config.PowerLimit * 10)
+            .word8(Math.round(config.PuffCutOff * 10))
+
+            .word8((((config.BatteryVoltageOffset1 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset1 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset2 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset2 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset3 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset3 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset4 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset4 * 100) & 0x7f))
+
+            .word8(config.RtcMode)
+
+            .word8(config.IsUsbCharge ? 1 : 0)
+            .word8(config.UsbNoSleep ? 1 : 0)
+            .word8(config.ChargingCurrent)
+            .word8(config.ResetCountersOnStartup ? 1 : 0)
+
             .word8(config.ShuntCorrection)
+            .word8(config.InternalResistance * 1000)
+
             .word8(config.BatteryModel)
             .buffer();
 
@@ -926,37 +943,17 @@ class ArcticFox extends events.EventEmitter {
             bin = Buffer.concat([bin, this.encodeCustomBattery(config.CustomBatteryProfiles[i])])
         }
 
-        bin = Buffer.concat([bin, put()
-            .word8(config.RtcMode)
-            .word8(config.IsUsbCharge ? 1 : 0)
-            .word8(config.ResetCountersOnStartup ? 1 : 0)
-            .buffer()
-        ]);
-
         for (let i = 0; i < 8; i++) {
             bin = Buffer.concat([bin, this.encodeTFRTable(config.TFRTables[i])])
         }
-
-        bin = Buffer.concat([bin, put()
-            .word8(Math.round(config.PuffCutOff * 10))
-            .buffer()
-        ]);
 
         for (let i = 0; i < 8; i++) {
             bin = Buffer.concat([bin, this.encodePowerCurve(config.PowerCurves[i])])
         }
 
         bin = Buffer.concat([bin, put()
-            .word8((((config.BatteryVoltageOffset1 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset1 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset2 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset2 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset3 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset3 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset4 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset4 * 100) & 0x7f))
-            .word8(config.CheckTCR ? 1 : 0)
-            .word8(config.UsbNoSleep ? 1 : 0)
             .word8(config.DeepSleepMode)
             .word8(config.DeepSleepDelay)
-            .word16le(config.PowerLimit * 10)
-            .word8(config.InternalResistance * 1000)
             .buffer()
         ]);
 
