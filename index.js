@@ -277,8 +277,7 @@ class ArcticFox extends events.EventEmitter {
             flags2 += 0x04;
         }
 
-
-        let bin = put()
+        const bin = put()
             .put(Buffer.from((profile.Name + '\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').substr(0, 8), 'ascii'))
             .word8(flags)
             .word8(flags2)
@@ -300,7 +299,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseProfile(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 8)
             .word8('Flags')
@@ -344,7 +342,7 @@ class ArcticFox extends events.EventEmitter {
     }
 
     encodeDeviceInfo(config) {
-        let bin = put()
+        const bin = put()
             .word8(config.SettingsVersion)
             .put(Buffer.from(config.ProductId, 'ascii'))
             .word32le(Number(config.HardwareVersion) * 100)
@@ -358,7 +356,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseDeviceInfo(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .word8u('SettingsVersion')
             .buffer('ProductId', 4)
@@ -382,7 +379,7 @@ class ArcticFox extends events.EventEmitter {
     }
 
     encodeGeneralConfiguration(config) {
-        let bin = put()
+        const bin = put()
             .word8(config.SelectedProfile)
             .word8(config.SmartMode)
             .word8(config.SmartRange)
@@ -392,7 +389,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseGeneralConfiguration(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .word8u('SelectedProfile')
             .word8u('SmartMode')
@@ -406,7 +402,7 @@ class ArcticFox extends events.EventEmitter {
     }
 
     encodeUiConfiguration(config) {
-        let bin = put()
+        const bin = put()
 
             // Generic
             .word8(Math.round(config.Brightness * 2.55))
@@ -468,7 +464,6 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.WakeUpByPlusMinus ? 1 : 0)
             .word8(config.IsUpDownSwapped ? 1 : 0)
 
-
             // Skin
             .word8(config.MainScreenSkin)
 
@@ -512,7 +507,6 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.MediumSkinTCLine2 + (config.MediumSkinTCLine2Puff ? 0x80 : 0))
             .word8(config.MediumSkinTCLine3 + (config.MediumSkinTCLine2Puff ? 0x80 : 0))
 
-
             // Regional
             .word8(config.TemperatureUnits)
             .word8(config.DateFormat)
@@ -538,14 +532,13 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.Hour)
             .word8(config.Minute)
             .word8(config.Second)
-        
+
             .buffer();
 
         return bin;
     }
 
     parseUiConiguration(buf) {
-        var l = buf.length;
         const data = binary.parse(buf)
 
             // Generic
@@ -574,7 +567,6 @@ class ArcticFox extends events.EventEmitter {
             .word8u('ClicksTC2')
 
             .word8u('FiveClicks')
-
 
             .word8u('ShortcutsVW0InStandby')
             .word8u('ShortcutsVW0InEditMain')
@@ -697,70 +689,70 @@ class ArcticFox extends events.EventEmitter {
         data.ClockOnClickInStealth = Boolean(data.ClockOnClickInStealth);
 
         data.ClassicSkinVWLine1Puff = Boolean(data.ClassicSkinVWLine1 & 0x80);
-        data.ClassicSkinVWLine1 = data.ClassicSkinVWLine1 & 0x7f;
+        data.ClassicSkinVWLine1 &= 0x7F;
         data.ClassicSkinVWLine2Puff = Boolean(data.ClassicSkinVWLine2 & 0x80);
-        data.ClassicSkinVWLine2 = data.ClassicSkinVWLine2 & 0x7f;
+        data.ClassicSkinVWLine2 &= 0x7F;
         data.ClassicSkinVWLine3Puff = Boolean(data.ClassicSkinVWLine3 & 0x80);
-        data.ClassicSkinVWLine3 = data.ClassicSkinVWLine3 & 0x7f;
+        data.ClassicSkinVWLine3 &= 0x7F;
         data.ClassicSkinVWLine4Puff = Boolean(data.ClassicSkinVWLine4 & 0x80);
-        data.ClassicSkinVWLine4 = data.ClassicSkinVWLine4 & 0x7f;
+        data.ClassicSkinVWLine4 &= 0x7F;
 
         data.ClassicSkinTCLine1Puff = Boolean(data.ClassicSkinTCLine1 & 0x80);
-        data.ClassicSkinTCLine1 = data.ClassicSkinTCLine1 & 0x7f;
+        data.ClassicSkinTCLine1 &= 0x7F;
         data.ClassicSkinTCLine2Puff = Boolean(data.ClassicSkinTCLine2 & 0x80);
-        data.ClassicSkinTCLine2 = data.ClassicSkinTCLine2 & 0x7f;
+        data.ClassicSkinTCLine2 &= 0x7F;
         data.ClassicSkinTCLine3Puff = Boolean(data.ClassicSkinTCLine3 & 0x80);
-        data.ClassicSkinTCLine3 = data.ClassicSkinTCLine3 & 0x7f;
+        data.ClassicSkinTCLine3 &= 0x7F;
         data.ClassicSkinTCLine4Puff = Boolean(data.ClassicSkinTCLine4 & 0x80);
-        data.ClassicSkinTCLine4 = data.ClassicSkinTCLine4 & 0x7f;
+        data.ClassicSkinTCLine4 &= 0x7F;
 
-        data.CircleSkinVWLine1 = data.CircleSkinVWLine1 & 0x7f;
-        data.CircleSkinVWLine2 = data.CircleSkinVWLine2 & 0x7f;
+        data.CircleSkinVWLine1 &= 0x7F;
+        data.CircleSkinVWLine2 &= 0x7F;
         data.CircleSkinVWLine3Puff = Boolean(data.CircleSkinVWLine3 & 0x80);
-        data.CircleSkinVWLine3 = data.CircleSkinVWLine3 & 0x7f;
+        data.CircleSkinVWLine3 &= 0x7F;
 
-        data.CircleSkinTCLine1 = data.CircleSkinTCLine1 & 0x7f;
-        data.CircleSkinTCLine2 = data.CircleSkinTCLine2 & 0x7f;
+        data.CircleSkinTCLine1 &= 0x7F;
+        data.CircleSkinTCLine2 &= 0x7F;
         data.CircleSkinTCLine3Puff = Boolean(data.CircleSkinTCLine3 & 0x80);
-        data.CircleSkinTCLine3 = data.CircleSkinTCLine3 & 0x7f;
+        data.CircleSkinTCLine3 &= 0x7F;
 
         data.FoxySkinVWLine1Puff = Boolean(data.FoxySkinVWLine1 & 0x80);
-        data.FoxySkinVWLine1 = data.FoxySkinVWLine1 & 0x7f;
+        data.FoxySkinVWLine1 &= 0x7F;
         data.FoxySkinVWLine2Puff = Boolean(data.FoxySkinVWLine2 & 0x80);
-        data.FoxySkinVWLine2 = data.FoxySkinVWLine2 & 0x7f;
+        data.FoxySkinVWLine2 &= 0x7F;
         data.FoxySkinVWLine3Puff = Boolean(data.FoxySkinVWLine3 & 0x80);
-        data.FoxySkinVWLine3 = data.FoxySkinVWLine3 & 0x7f;
+        data.FoxySkinVWLine3 &= 0x7F;
 
         data.FoxySkinTCLine1Puff = Boolean(data.FoxySkinTCLine1 & 0x80);
-        data.FoxySkinTCLine1 = data.FoxySkinTCLine1 & 0x7f;
+        data.FoxySkinTCLine1 &= 0x7F;
         data.FoxySkinTCLine2Puff = Boolean(data.FoxySkinTCLine2 & 0x80);
-        data.FoxySkinTCLine2 = data.FoxySkinTCLine2 & 0x7f;
+        data.FoxySkinTCLine2 &= 0x7F;
         data.FoxySkinTCLine3Puff = Boolean(data.FoxySkinTCLine3 & 0x80);
-        data.FoxySkinTCLine3 = data.FoxySkinTCLine3 & 0x7f;
+        data.FoxySkinTCLine3 &= 0x7F;
 
         data.SmallSkinVWLine1Puff = Boolean(data.SmallSkinVWLine1 & 0x80);
-        data.SmallSkinVWLine1 = data.SmallSkinVWLine1 & 0x7f;
+        data.SmallSkinVWLine1 &= 0x7F;
         data.SmallSkinVWLine2Puff = Boolean(data.SmallSkinVWLine2 & 0x80);
-        data.SmallSkinVWLine2 = data.SmallSkinVWLine2 & 0x7f;
+        data.SmallSkinVWLine2 &= 0x7F;
 
         data.SmallSkinTCLine1Puff = Boolean(data.SmallSkinTCLine1 & 0x80);
-        data.SmallSkinTCLine1 = data.SmallSkinTCLine1 & 0x7f;
+        data.SmallSkinTCLine1 &= 0x7F;
         data.SmallSkinTCLine2Puff = Boolean(data.SmallSkinTCLine2 & 0x80);
-        data.SmallSkinTCLine2 = data.SmallSkinTCLine2 & 0x7f;
+        data.SmallSkinTCLine2 &= 0x7F;
 
         data.MediumSkinVWLine1Puff = Boolean(data.MediumSkinVWLine1 & 0x80);
-        data.MediumSkinVWLine1 = data.MediumSkinVWLine1 & 0x7f;
+        data.MediumSkinVWLine1 &= 0x7F;
         data.MediumSkinVWLine2Puff = Boolean(data.MediumSkinVWLine2 & 0x80);
-        data.MediumSkinVWLine2 = data.MediumSkinVWLine2 & 0x7f;
+        data.MediumSkinVWLine2 &= 0x7F;
         data.MediumSkinVWLine3Puff = Boolean(data.MediumSkinVWLine3 & 0x80);
-        data.MediumSkinVWLine3 = data.MediumSkinVWLine3 & 0x7f;
+        data.MediumSkinVWLine3 &= 0x7F;
 
         data.MediumSkinTCLine1Puff = Boolean(data.MediumSkinTCLine1 & 0x80);
-        data.MediumSkinTCLine1 = data.MediumSkinTCLine1 & 0x7f;
+        data.MediumSkinTCLine1 &= 0x7F;
         data.MediumSkinTCLine2Puff = Boolean(data.MediumSkinTCLine2 & 0x80);
-        data.MediumSkinTCLine2 = data.MediumSkinTCLine2 & 0x7f;
+        data.MediumSkinTCLine2 &= 0x7F;
         data.MediumSkinTCLine3Puff = Boolean(data.MediumSkinTCLine3 & 0x80);
-        data.MediumSkinTCLine3 = data.MediumSkinTCLine3 & 0x7f;
+        data.MediumSkinTCLine3 &= 0x7F;
 
         data.Brightness = Math.round(data.Brightness / 2.55);
         data.PuffScreenDelay = Math.round(data.PuffScreenDelay / 10);
@@ -793,7 +785,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseCustomBattery(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 4)
             .buffer('buf', buf.length)
@@ -848,7 +839,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseTFRTable(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 4)
             .buffer('buf', buf.length)
@@ -895,7 +885,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parsePowerCurve(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .buffer('Name', 8)
             .buffer('buf', buf.length)
@@ -930,10 +919,10 @@ class ArcticFox extends events.EventEmitter {
             .word16le(config.PowerLimit * 10)
             .word8(Math.round(config.PuffCutOff * 10))
 
-            .word8((((config.BatteryVoltageOffset1 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset1 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset2 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset2 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset3 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset3 * 100) & 0x7f))
-            .word8((((config.BatteryVoltageOffset4 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset4 * 100) & 0x7f))
+            .word8((((config.BatteryVoltageOffset1 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset1 * 100) & 0x7F))
+            .word8((((config.BatteryVoltageOffset2 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset2 * 100) & 0x7F))
+            .word8((((config.BatteryVoltageOffset3 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset3 * 100) & 0x7F))
+            .word8((((config.BatteryVoltageOffset4 < 0)) ? 0x80 : 0) + ((config.BatteryVoltageOffset4 * 100) & 0x7F))
 
             .word8(config.RtcMode)
 
@@ -949,15 +938,15 @@ class ArcticFox extends events.EventEmitter {
             .buffer();
 
         for (let i = 0; i < 3; i++) {
-            bin = Buffer.concat([bin, this.encodeCustomBattery(config.CustomBatteryProfiles[i])])
+            bin = Buffer.concat([bin, this.encodeCustomBattery(config.CustomBatteryProfiles[i])]);
         }
 
         for (let i = 0; i < 8; i++) {
-            bin = Buffer.concat([bin, this.encodeTFRTable(config.TFRTables[i])])
+            bin = Buffer.concat([bin, this.encodeTFRTable(config.TFRTables[i])]);
         }
 
         for (let i = 0; i < 8; i++) {
-            bin = Buffer.concat([bin, this.encodePowerCurve(config.PowerCurves[i])])
+            bin = Buffer.concat([bin, this.encodePowerCurve(config.PowerCurves[i])]);
         }
 
         bin = Buffer.concat([bin, put()
@@ -970,7 +959,6 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseAdvancedConfiguration(buf) {
-        const l = buf.length;
         const data = binary.parse(buf)
             .word16lu('PowerLimit')
             .word8u('PuffCutOff')
@@ -1006,9 +994,6 @@ class ArcticFox extends events.EventEmitter {
             data.CustomBatteryProfiles.push(cbres.data);
         }
 
-
-        this.extend(data, data2);
-
         data.TFRTables = [];
         for (let i = 0; i < 8; i++) {
             const tfrres = this.parseTFRTable(buf);
@@ -1016,8 +1001,6 @@ class ArcticFox extends events.EventEmitter {
             delete tfrres.buf;
             data.TFRTables.push(tfrres.data);
         }
-
-        buf = pcores.buf;
 
         data.PowerCurves = [];
         for (let i = 0; i < 8; i++) {
@@ -1071,13 +1054,13 @@ class ArcticFox extends events.EventEmitter {
 
         bin = Buffer.concat([bin, Buffer.from(Array.apply(null, Array(this.configurationLength - bin.length)).map(Number.prototype.valueOf, 0))]);
 
-        //this.saveDump('b.bin', bin);
+        // This.saveDump('b.bin', bin);
 
         return Array.prototype.slice.call(bin, 0);
     }
 
     saveDump(file, buf) {
-        let str = buf.toString('hex');
+        const str = buf.toString('hex');
         let out = '';
         for (let i = 0; i < str.length; i += 32) {
             out += (str.substr(i, 32) + '\n');
@@ -1086,7 +1069,7 @@ class ArcticFox extends events.EventEmitter {
     }
 
     parseConfiguration(buf, callback) {
-        //this.saveDump('a.bin', buf);
+        // This.saveDump('a.bin', buf);
 
         // See https://github.com/TBXin/NFirmwareEditor/blob/master/src/NToolbox/Models/ArcticFoxConfiguration.cs
         let res = this.parseDeviceInfo(buf);
