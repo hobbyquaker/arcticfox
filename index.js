@@ -296,19 +296,23 @@ class ArcticFox extends events.EventEmitter {
             .buffer('Name', 8)
             .word8('Flags')
             .word8('Flags2')
+
+            .word16lu('Power')
             .word8('PreheatType')
             .word8('SelectedCurve')
             .word8('PreheatTime')
             .word8('PreheatDelay')
             .word16lu('PreheatPower')
-            .word16lu('Power')
+
             .word16lu('Temperature')
             .word16lu('Resistance')
             .word16lu('TCR')
+
             .word8('PIRegulatorIsEnabled')
             .word8('PIRegulatorRange')
             .word16lu('PIRegulatorPValue')
             .word16lu('PIRegulatorIValue')
+
             .buffer('buf', buf.length)
             .vars;
 
