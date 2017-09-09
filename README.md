@@ -16,7 +16,8 @@ Ported to Javascript from https://github.com/TBXin/NFirmwareEditor
 
 See [test.js](test.js) for examples...
 
-__Versioning:__ The major number of this libs version reflects the SettingsVersion it is made for.
+__Versioning:__ The major number of this libs version reflects the SettingsVersion it is made for. e.g. `v11.0.0` is
+made for Arcticfox `P11`.
 
 
 ## Related
