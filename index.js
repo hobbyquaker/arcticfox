@@ -60,8 +60,8 @@ class ArcticFox extends events.EventEmitter {
         this.reconnectTimeout = 1000;
         this.callbackTimeout = 1000;
 
-        this.minimumSupportedBuildNumber = 170624;
-        this.supportedSettingsVersion = 10;
+        this.minimumSupportedBuildNumber = 170909;
+        this.supportedSettingsVersion = 11;
 
         this.vendorId = 0x0416;
         this.productId = 0x5020;
