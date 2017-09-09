@@ -308,7 +308,6 @@ class ArcticFox extends events.EventEmitter {
             .word16lu('Resistance')
             .word16lu('TCR')
 
-            .word8('PIRegulatorIsEnabled')
             .word8('PIRegulatorRange')
             .word16lu('PIRegulatorPValue')
             .word16lu('PIRegulatorIValue')
