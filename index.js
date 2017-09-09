@@ -951,7 +951,24 @@ class ArcticFox extends events.EventEmitter {
     parseAdvancedConfiguration(buf) {
         const l = buf.length;
         const data = binary.parse(buf)
+            .word16lu('PowerLimit')
+            .word8u('PuffCutOff')
+
+            .word8s('BatteryVoltageOffset1')
+            .word8s('BatteryVoltageOffset2')
+            .word8s('BatteryVoltageOffset3')
+            .word8s('BatteryVoltageOffset4')
+
+            .word8u('RtcMode')
+
+            .word8u('IsUsbCharge')
+            .word8u('UsbNoSleep')
+            .word8u('ChargingCurrent')
+            .word8u('ResetCountersOnStartup')
+
             .word8u('ShuntCorrection')
+            .word8u('InternalResistance')
+
             .word8u('BatteryModel')
 
             .buffer('buf', buf.length)
@@ -968,18 +985,7 @@ class ArcticFox extends events.EventEmitter {
             data.CustomBatteryProfiles.push(cbres.data);
         }
 
-        const data2 = binary.parse(buf)
-            .word8u('RtcMode')
-            .word8u('IsUsbCharge')
-            .word8u('ResetCountersOnStartup')
-            .buffer('buf', buf.length)
-            .vars;
 
-        data2.IsUsbCharge = Boolean(data2.IsUsbCharge);
-        data2.ResetCountersOnStartup = Boolean(data2.ResetCountersOnStartup);
-
-        buf = data2.buf;
-        delete data2.buf;
         this.extend(data, data2);
 
         data.TFRTables = [];
@@ -990,12 +996,6 @@ class ArcticFox extends events.EventEmitter {
             data.TFRTables.push(tfrres.data);
         }
 
-        const pcores = binary.parse(buf)
-            .word8u('PuffCutOff')
-            .buffer('buf', buf.length)
-            .vars;
-
-        data.PuffCutOff = Math.round(pcores.PuffCutOff / 10);
         buf = pcores.buf;
 
         data.PowerCurves = [];
@@ -1007,33 +1007,30 @@ class ArcticFox extends events.EventEmitter {
         }
 
         const data3 = binary.parse(buf)
-            .word8s('BatteryVoltageOffset1')
-            .word8s('BatteryVoltageOffset2')
-            .word8s('BatteryVoltageOffset3')
-            .word8s('BatteryVoltageOffset4')
-            .word8u('CheckTCR')
-            .word8u('UsbNoSleep')
             .word8u('DeepSleepMode')
             .word8u('DeepSleepDelay')
-            .word16lu('PowerLimit')
-            .word8u('InternalResistance')
             .buffer('buf', buf.length)
             .vars;
 
         buf = data3.buf;
         delete data3.buf;
 
-        data3.BatteryVoltageOffset1 /= 100;
-        data3.BatteryVoltageOffset2 /= 100;
-        data3.BatteryVoltageOffset3 /= 100;
-        data3.BatteryVoltageOffset4 /= 100;
-
-        data3.CheckTCR = Boolean(data3.CheckTCR);
-        data3.UsbNoSleep = Boolean(data3.UsbNoSleep);
-        data3.PowerLimit /= 10;
-        data3.InternalResistance /= 1000;
-
         this.extend(data, data3);
+
+        data.PuffCutOff = Math.round(data.PuffCutOff / 10);
+
+        data.IsUsbCharge = Boolean(data.IsUsbCharge);
+        data.ResetCountersOnStartup = Boolean(data.ResetCountersOnStartup);
+
+        data.BatteryVoltageOffset1 /= 100;
+        data.BatteryVoltageOffset2 /= 100;
+        data.BatteryVoltageOffset3 /= 100;
+        data.BatteryVoltageOffset4 /= 100;
+
+        data.CheckTCR = Boolean(data.CheckTCR);
+        data.UsbNoSleep = Boolean(data.UsbNoSleep);
+        data.PowerLimit /= 10;
+        data.InternalResistance /= 1000;
 
         return {data, buf};
     }
