@@ -399,6 +399,23 @@ class ArcticFox extends events.EventEmitter {
     encodeUiConfiguration(config) {
         let bin = put()
 
+            // Generic
+            .word8(Math.round(config.Brightness * 2.55))
+            .word8(config.IsFlipped ? 1 : 0)
+            .word8(config.IsLogoEnabled ? 1 : 0)
+            .word8(config.IsClockOnMainScreen ? 1 : 0)
+            .word8(config.ClockType)
+
+            // Timeouts
+            .word8(config.DimTimeout)
+            .word8(config.DimTimeoutLocked)
+            .word8(config.DimTimeoutCharging)
+            .word8(config.ShowLogoDelay)
+            .word8(config.ShowClockDelay)
+            .word8(config.ScreensaveDuration)
+            .word8(Math.round(config.PuffScreenDelay * 10))
+
+            // Control
             .word8(config.ClicksVW0)
             .word8(config.ClicksVW1)
             .word8(config.ClicksVW2)
@@ -406,6 +423,8 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.ClicksTC0)
             .word8(config.ClicksTC1)
             .word8(config.ClicksTC2)
+
+            .word8(config.FiveClicks)
 
             .word8(config.ShortcutsVW0InStandby)
             .word8(config.ShortcutsVW0InEditMain)
@@ -436,6 +455,13 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.ShortcutsTC2InEditMain)
             .word8(config.ShortcutsTC2InSelector)
             .word8(config.ShortcutsTC2InMenu)
+
+            .word8(config.WakeUpByPlusMinus ? 1 : 0)
+            .word8(config.IsUpDownSwapped ? 1 : 0)
+
+
+            // Skin
+            .word8(config.MainScreenSkin)
 
             .word8(config.ClassicSkinVWLine1 + (config.ClassicSkinVWLine1Puff ? 0x80 : 0))
             .word8(config.ClassicSkinVWLine2 + (config.ClassicSkinVWLine2Puff ? 0x80 : 0))
@@ -478,42 +504,24 @@ class ArcticFox extends events.EventEmitter {
             .word8(config.MediumSkinTCLine3 + (config.MediumSkinTCLine2Puff ? 0x80 : 0))
 
 
-            .word8(Math.round(config.Brightness * 2.55))
-            .word8(config.DimTimeout)
-            .word8(config.DimTimeoutLocked)
-            .word8(config.DimTimeoutCharging)
-            .word8(config.ShowLogoDelay)
-            .word8(config.ShowClockDelay)
+            // Regional
+            .word8(config.TemperatureUnits)
+            .word8(config.DateFormat)
+            .word8(config.TimeFormat)
+            .word8(config.PuffsTimeFormat)
 
-            .word8(config.IsFlipped ? 1 : 0)
-            .word8(config.IsStealthMode ? 1 : 0)
-            .word8(config.WakeUpByPlusMinus ? 1 : 0)
-            .word8(config.IsPowerStep1W ? 1 : 0)
-            .word8(config.IsTemperatureStep1C2F ? 1 : 0)
-
+            // Charging
             .word8(config.ChargeScreenType)
             .word8(config.ChargeExtraType)
 
-            .word8(config.IsLogoEnabled ? 1 : 0)
-            .word8(config.IsClassicMenu ? 1 : 0)
-
-            .word8(config.ClockType)
-            .word8(config.IsClockOnMainScreen ? 1 : 0)
-
-            .word8(config.ScreensaveDuration)
-            .word8(Math.round(config.PuffScreenDelay * 10))
-            .word8(config.PuffsTimeFormat)
-
-            .word8(config.MainScreenSkin)
-            .word8(config.IsUpDownSwapped ? 1 : 0)
+            // Stealth
+            .word8(config.IsStealthMode ? 1 : 0)
             .word8(config.ShowChargingInStealth ? 1 : 0)
-            .word8(config.ShowScreensaverInStealth)
+            .word8(config.ShowScreensaverInStealth ? 1 : 0)
             .word8(config.ClockOnClickInStealth ? 1 : 0)
-            .word8(config.FiveClicks)
 
             .word32le(config.PuffsCount)
             .word32le(config.PuffsTime)
-
 
             .word16le(config.Year)
             .word8(config.Month)
