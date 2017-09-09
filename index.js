@@ -507,6 +507,7 @@ class ArcticFox extends events.EventEmitter {
             .word32le(config.PuffsCount)
             .word32le(config.PuffsTime)
 
+
             .word16le(config.Year)
             .word8(config.Month)
             .word8(config.Day)
@@ -522,6 +523,24 @@ class ArcticFox extends events.EventEmitter {
     parseUiConiguration(buf) {
         var l = buf.length;
         const data = binary.parse(buf)
+
+            // Generic
+            .word8u('Brightness')
+            .word8u('IsFlipped')
+            .word8u('IsLogoEnabled')
+            .word8u('IsClockOnMainScreen')
+            .word8u('ClockType')
+
+            // Timeouts
+            .word8u('DimTimeout')
+            .word8u('DimTimeoutLocked')
+            .word8u('DimTimeoutCharging')
+            .word8u('ShowLogoDelay')
+            .word8u('ShowClockDelay')
+            .word8u('ScreensaveDuration')
+            .word8u('PuffScreenDelay')
+
+            // Control
             .word8u('ClicksVW0')
             .word8u('ClicksVW1')
             .word8u('ClicksVW2')
@@ -529,6 +548,9 @@ class ArcticFox extends events.EventEmitter {
             .word8u('ClicksTC0')
             .word8u('ClicksTC1')
             .word8u('ClicksTC2')
+
+            .word8u('FiveClicks')
+
 
             .word8u('ShortcutsVW0InStandby')
             .word8u('ShortcutsVW0InEditMain')
@@ -559,6 +581,12 @@ class ArcticFox extends events.EventEmitter {
             .word8u('ShortcutsTC2InEditMain')
             .word8u('ShortcutsTC2InSelector')
             .word8u('ShortcutsTC2InMenu')
+
+            .word8u('WakeUpByPlusMinus')
+            .word8u('IsUpDownSwapped')
+
+            // Skin
+            .word8u('MainScreenSkin')
 
             .word8u('ClassicSkinVWLine1')
             .word8u('ClassicSkinVWLine2')
@@ -600,42 +628,27 @@ class ArcticFox extends events.EventEmitter {
             .word8u('MediumSkinTCLine2')
             .word8u('MediumSkinTCLine3')
 
-            .word8u('Brightness')
-            .word8u('DimTimeout')
-            .word8u('DimTimeoutLocked')
-            .word8u('DimTimeoutCharging')
-            .word8u('ShowLogoDelay')
-            .word8u('ShowClockDelay')
+            // Regional
+            .word8u('TemperatureUnit')
+            .word8u('DateFormat')
+            .word8u('TimeFormat')
+            .word8u('PuffsTimeFormat')
 
-            .word8u('IsFlipped')
-            .word8u('IsStealthMode')
-            .word8u('WakeUpByPlusMinus')
-            .word8u('IsPowerStep1W')
-            .word8u('IsTemperatureStep1C2F')
-
+            // Charging
             .word8u('ChargeScreenType')
             .word8u('ChargeExtraType')
 
-            .word8u('IsLogoEnabled')
-            .word8u('IsClassicMenu')
-
-            .word8u('ClockType')
-            .word8u('IsClockOnMainScreen')
-
-            .word8u('ScreensaveDuration')
-            .word8u('PuffScreenDelay')
-            .word8u('PuffsTimeFormat')
-
-            .word8u('MainScreenSkin')
-            .word8u('IsUpDownSwapped')
+            // Stealth
+            .word8u('IsStealthMode')
             .word8u('ShowChargingInStealth')
             .word8u('ShowScreensaverInStealth')
             .word8u('ClockOnClickInStealth')
-            .word8u('FiveClicks')
 
+            // CountersData
             .word32lu('PuffsCount')
             .word32lu('PuffsTime')
 
+            // DateTime
             .word16lu('Year')
             .word8u('Month')
             .word8u('Day')
