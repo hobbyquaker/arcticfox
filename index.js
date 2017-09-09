@@ -259,9 +259,6 @@ class ArcticFox extends events.EventEmitter {
         if (profile.IsTemperatureDominant) {
             flags += 0x10;
         }
-        if (profile.IsCelcius) {
-            flags += 0x20;
-        }
         if (profile.IsResistanceLocked) {
             flags += 0x40;
         }
@@ -269,19 +266,31 @@ class ArcticFox extends events.EventEmitter {
             flags += 0x80;
         }
 
+        let flags2 = 0;
+        if (profile.IsPIEnabled) {
+            flags2 += 0x01;
+        }
+        if (profile.IsPowerStep1W) {
+            flags2 += 0x02;
+        }
+        if (profile.IsTemperatureStep1C2F) {
+            flags2 += 0x04;
+        }
+
+
         let bin = put()
             .put(Buffer.from((profile.Name + '\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').substr(0, 8), 'ascii'))
             .word8(flags)
+            .word8(flags2)
+            .word16le(profile.Power * 10)
             .word8(profile.PreheatType)
             .word8(profile.SelectedCurve)
             .word8(profile.PreheatTime * 100)
             .word8(profile.PreheatDelay * 10)
             .word16le(profile.PreheatPower)
-            .word16le(profile.Power * 10)
             .word16le(profile.Temperature)
             .word16le(profile.Resistance * 1000)
             .word16le(profile.TCR)
-            .word8(profile.PIRegulatorIsEnabled)
             .word8(profile.PIRegulatorRange)
             .word16le(profile.PIRegulatorPValue)
             .word16le(profile.PIRegulatorIValue)
