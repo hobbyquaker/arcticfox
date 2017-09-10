@@ -332,9 +332,9 @@ class ArcticFox extends events.EventEmitter {
         data.IsResistanceLocked = Boolean(data.Flags & 0x40);
         data.IsEnabled = Boolean(data.Flags & 0x80);
 
-        data.IsPIEnabled = Boolean(data.Flag2 & 0x01);
-        data.IsPowerStep1W = Boolean(data.Flag2 & 0x02);
-        data.IsTemperatureStep1C2F = Boolean(data.Flag2 & 0x04);
+        data.IsPIEnabled = Boolean(data.Flags2 & 0x01);
+        data.IsPowerStep1W = Boolean(data.Flags2 & 0x02);
+        data.IsTemperatureStep1C2F = Boolean(data.Flags2 & 0x04);
 
         buf = data.buf;
         delete data.buf;
@@ -647,7 +647,7 @@ class ArcticFox extends events.EventEmitter {
             .word8u('MediumSkinTCLine3')
 
             // Regional
-            .word8u('TemperatureUnit')
+            .word8u('TemperatureUnits')
             .word8u('DateFormat')
             .word8u('TimeFormat')
             .word8u('PuffsTimeFormat')
