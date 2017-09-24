@@ -286,7 +286,7 @@ class ArcticFox extends events.EventEmitter {
             .word8(profile.SelectedCurve)
             .word8(profile.PreheatTime * 100)
             .word8(profile.PreheatDelay * 10)
-            .word16le(profile.PreheatPower)
+            .word16le(profile.PreheatPower * 10)
             .word16le(profile.Temperature)
             .word16le(profile.Resistance * 1000)
             .word16le(profile.TCR)
@@ -327,6 +327,7 @@ class ArcticFox extends events.EventEmitter {
         data.Resistance /= 1000;
         data.PreheatTime /= 100;
         data.PreheatDelay /= 10;
+        data.PreheatPower /= 10;
         data.Material = data.Flags & 0x0F;
         data.IsTemperatureDominant = Boolean(data.Flags & 0x10);
         data.IsResistanceLocked = Boolean(data.Flags & 0x40);

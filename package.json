@@ -1,6 +1,6 @@
 {
   "name": "arcticfox",
-  "version": "11.0.2",
+  "version": "11.0.3",
   "description": "Module that abstracts the HID communication with the ArcticFox firmware",
   "main": "index.js",
   "scripts": {
